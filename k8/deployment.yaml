@@ -4,7 +4,7 @@ metadata:
   name: bangla-portal
   namespace: default
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: bangla-portal
