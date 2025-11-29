@@ -4,7 +4,7 @@ metadata:
   name: bangla-portal-config
   namespace: default
 data:
-  DATABASE_URL: "postgresql://portal_user:portal_pass@192.168.16.190:5432/bangla_portal"
+  DATABASE_URL: "postgresql://portal_user:portal_pass@172.30.200.171:5432/bangla_portal"
   DB_HOST: "172.30.200.171"
   #DB_HOST: "192.168.16.190"
   DB_USER: "portal_user"
