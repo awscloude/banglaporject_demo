@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: bangla-portal
-        image: ccrosscloud/bangla_portal:20251129141002
+        image: ccrosscloud/bangla_portal:20251129141032
         ports:
         - containerPort: 8000
         envFrom:
