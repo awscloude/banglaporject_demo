@@ -45,7 +45,7 @@ jobs:
       # 6. Update Deployment YAML with new image (optional)
       - name: Update Deployment File
         run: |
-          sed -i 's|image: ccrosscloud/bangla_portal:.*|image: ccrosscloud/bangla_portal:${{ steps.extract_tag.outputs.tag }}|g' k8s/deployment.yaml
+          sed -i 's|image: ccrosscloud/bangla_portal:.*|image: ccrosscloud/bangla_portal:${{ steps.extract_tag.outputs.tag }}|g' k8/deployment.yaml
 
       # 7. Commit changes (optional)
       - name: Commit files
