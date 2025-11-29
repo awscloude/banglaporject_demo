@@ -1,63 +1,62 @@
-name: Deploy to Kubernetes
+name: Build & Push Docker
 
 on:
   push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
-env:
-  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+    branches:
+      - main
 
 jobs:
-  deploy-to-demosever:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout the code
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      # 2. Login to Docker Hub
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
+      # 1. Checkout using PAT (required!)
+      - name: Checkout Repo
+        uses: actions/checkout@v4
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          token: ${{ secrets.PAT_TOKEN }}
 
-      # 3. Set timestamp-based IMAGE_TAG
-      - name: Set Tag as Environment Variable
-        run: echo "IMAGE_TAG=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
+      # 2. Set up Docker
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      # 4. Build and push Docker image from demo folder
-      - name: Build and push Docker image
-        run: |
-          docker build -f demo/Dockerfile -t ${DOCKER_USERNAME}/bangla_portal:${{ env.IMAGE_TAG }} demo
-          docker push ${DOCKER_USERNAME}/bangla_portal:${{ env.IMAGE_TAG }}
+      # 3. Login to Docker Hub
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # 5. Get latest image tag (optional)
-      - name: Get Latest Image Tag
+      # 4. Extract Tag
+      - name: Extract Tag
         id: extract_tag
-        run: |
-          echo "::set-output name=tag::${{ env.IMAGE_TAG }}"
+        run: echo "tag=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
 
-      # 6. Update Deployment YAML with new image (optional)
+      # 5. Build & Push Image
+      - name: Build and Push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ccrosscloud/bangla_portal:${{ steps.extract_tag.outputs.tag }}
+
+      # 6. Update Deployment YAML
       - name: Update Deployment File
         run: |
           sed -i 's|image: ccrosscloud/bangla_portal:.*|image: ccrosscloud/bangla_portal:${{ steps.extract_tag.outputs.tag }}|g' k8/deployment.yaml
 
-      # 7. Commit changes (optional)
+      # 7. Commit changes
       - name: Commit files
         run: |
-          git config --local user.email "survivalmotivator@gmail.com"
-          git config --local user.name "awscloude"
-          git commit -am "Update image tag to $GITHUB_SHA" || echo "No changes to commit"
+          git config --local user.email "survivalmdddotivator@gmail.com"
+          git config --local user.name "awscloudssdsde"
+          git add k8/deployment.yaml
+          git commit -m "Update image tag to ${{ steps.extract_tag.outputs.tag }}" || echo "No changes to commit"
 
-      # 8. Push changes back to main (optional)
+      # 8. Push changes using PAT
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
-          branch: main
           github_token: ${{ secrets.PAT_TOKEN }}
-          force: true
+          branch: main
+
