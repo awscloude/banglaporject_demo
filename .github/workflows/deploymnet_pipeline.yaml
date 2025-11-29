@@ -48,7 +48,7 @@ jobs:
         run: |
           git config --local user.email "survivalmotivator@gmail.com"
           git config --local user.name "awscloude"
-          git add k8s/deployment.yaml
+          git add k8/deployment.yaml
           git commit -m "Update bangla_portal image to $IMAGE_TAG" || echo "No changes to commit"
 
       # 7️⃣ Push changes back to main branch using GITHUB_TOKEN
