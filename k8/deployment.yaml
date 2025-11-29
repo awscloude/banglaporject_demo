@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bangla-portal
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bangla-portal
+  template:
+    metadata:
+      labels:
+        app: bangla-portal
+    spec:
+      containers:
+      - name: bangla-portal
+        image: ccrosscloud/bangla_portal:v1
+        ports:
+        - containerPort: 8000
+        envFrom:
+        - configMapRef:
+            name: bangla-portal-config
+
