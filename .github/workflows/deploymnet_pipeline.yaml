@@ -1,62 +1,60 @@
-name: Build & Push Docker
+name: Deploy Bangla Portal to Kubernetes
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
 jobs:
-  build:
+  deploy-to-staging:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout using PAT (required!)
-      - name: Checkout Repo
-        uses: actions/checkout@v4
+      # 1️⃣ Checkout the code
+      - name: Checkout repository
+        uses: actions/checkout@v3
         with:
           token: ${{ secrets.PAT_TOKEN }}
 
-      # 2. Set up Docker
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      # 3. Login to Docker Hub
+      # 2️⃣ Login to Docker Hub
       - name: Login to Docker Hub
-        uses: docker/login-action@v3
+        uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 4. Extract Tag
-      - name: Extract Tag
-        id: extract_tag
-        run: echo "tag=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+      # 3️⃣ Set IMAGE_TAG environment variable
+      - name: Set IMAGE_TAG
+        run: echo "IMAGE_TAG=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
 
-      # 5. Build & Push Image
-      - name: Build and Push
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ccrosscloud/bangla_portal:${{ steps.extract_tag.outputs.tag }}
-
-      # 6. Update Deployment YAML
-      - name: Update Deployment File
+      # 4️⃣ Build and push Docker image
+      - name: Build and push Docker image
         run: |
-          sed -i 's|image: ccrosscloud/bangla_portal:.*|image: ccrosscloud/bangla_portal:${{ steps.extract_tag.outputs.tag }}|g' k8/deployment.yaml
+          docker build -t ${DOCKER_USERNAME}/bangla_portal:${{ env.IMAGE_TAG }} demo
+          docker push ${DOCKER_USERNAME}/bangla_portal:${{ env.IMAGE_TAG }}
 
-      # 7. Commit changes
-      - name: Commit files
+      # 5️⃣ Update Kubernetes deployment YAML with new image tag
+      - name: Update Deployment YAML
         run: |
-          git config --local user.email "survivalmdddotivator@gmail.com"
-          git config --local user.name "awscloudssdsde"
-          git add k8/deployment.yaml
-          git commit -m "Update image tag to ${{ steps.extract_tag.outputs.tag }}" || echo "No changes to commit"
+          sed -i 's|image: ccrosscloud/bangla_portal:.*|image: ccrosscloud/bangla_portal:${{ env.IMAGE_TAG }}|g' k8s/deployment.yaml
 
-      # 8. Push changes using PAT
+      # 6️⃣ Commit changes to repo
+      - name: Commit changes
+        run: |
+          git config --local user.email "survivalmotivator@gmail.com"
+          git config --local user.name "awscloude"
+          git add k8s/deployment.yaml
+          git commit -m "Update bangla_portal image to $IMAGE_TAG" || echo "No changes to commit"
+
+      # 7️⃣ Push changes back to main branch using GITHUB_TOKEN
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
-          github_token: ${{ secrets.PAT_TOKEN }}
           branch: main
+          github_token: ${{ secrets.PAT_TOKEN }}
 
