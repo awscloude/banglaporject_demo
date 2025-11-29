@@ -11,7 +11,7 @@ env:
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
 jobs:
-  deploy-to-staging:
+  deploy-to-demosever:
     runs-on: ubuntu-latest
 
     steps:
@@ -59,4 +59,5 @@ jobs:
         uses: ad-m/github-push-action@master
         with:
           branch: main
+          github_token: ${{ secrets.PAT_TOKEN }}
 
