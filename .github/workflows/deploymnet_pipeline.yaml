@@ -41,7 +41,7 @@ jobs:
       # 5️⃣ Update Kubernetes deployment YAML with new image tag
       - name: Update Deployment YAML
         run: |
-          sed -i 's|image: ccrosscloud/bangla_portal:.*|image: ccrosscloud/bangla_portal:${{ env.IMAGE_TAG }}|g' k8s/deployment.yaml
+          sed -i 's|image: ccrosscloud/bangla_portal:.*|image: ccrosscloud/bangla_portal:${{ env.IMAGE_TAG }}|g' k8/deployment.yaml
 
       # 6️⃣ Commit changes to repo
       - name: Commit changes
