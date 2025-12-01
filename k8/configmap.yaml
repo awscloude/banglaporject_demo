@@ -8,4 +8,7 @@ data:
   DB_HOST: "172.30.200.171"
   #DB_HOST: "192.168.16.190"
   DB_USER: "portal_user"
+  # OpenTelemetry variables
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.observability.svc.cluster.local:4317"
+  OTEL_PYTHON_AUTO_INSTRUMENTATION_ENABLED: "true"
 
