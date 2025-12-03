@@ -4,7 +4,7 @@ WORKDIR /app
 COPY app/ ./app/
 COPY requirements.txt .
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txtt
 
 # Install OpenTelemetry auto-instrumentation
 RUN pip install opentelemetry-distro opentelemetry-exporter-otlp
