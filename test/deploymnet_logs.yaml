@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bangla-portal-logs
+  labels:
+    app: bangla-portal-logs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bangla-portal-logs
+  template:
+    metadata:
+      labels:
+        app: bangla-portal-logs
+    spec:
+      containers:
+      - name: bangla-portal-logs
+        image: ccrosscloud/bangla_portal:logs_gen
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bangla-portal-logs
+spec:
+  selector:
+    app: bangla-portal-logs
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: ClusterIP
